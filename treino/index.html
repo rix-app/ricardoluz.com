@@ -1,1 +1,252 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preecha os Dados</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: #0B0D10;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      background-color: #12161B;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #267FC1;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #2A2F35;
+      border-radius: 10px;
+      background-color: #0B0D10;
+      color: white;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #267FC1;
+      box-shadow: 0 0 6px #267FC1;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #267FC1;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #1b689f;
+    }
+    #resultado {
+      background-color: white;
+      color: black;
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    #resultado h2 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    #resultado h3 {
+      color: #000;
+      margin-bottom: 3px;
+      margin-top: 10px;
+    }
+    #resultado ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 10px 0;
+    }
+    #resultado li {
+      border-bottom: 1px solid #ccc;
+      padding: 2px 0;
+    }
+    @media print {
+      body {
+        background: white;
+        color: black;
+        margin: 0;
+        padding: 0;
+      }
+      .container, button {
+        display: none;
+      }
+      #resultado {
+        background: white;
+        color: black;
+        font-size: 12px;
+        padding: 20px;
+        margin: 0;
+        column-count: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Prescritor de Treino Inteligente</h1>
+    <div class="form-grid">
+      <div>
+        <label>Data de Início</label>
+        <input type="date" id="data" />
+      </div>
+      <div>
+        <label>Nome Completo</label>
+        <input type="text" id="nome" />
+      </div>
+      <div>
+        <label>Idade</label>
+        <input type="number" id="idade" min="10" />
+      </div>
+      <div>
+        <label>Sexo</label>
+        <select id="sexo">
+          <option value="masculino">Masculino</option>
+          <option value="feminino">Feminino</option>
+        </select>
+      </div>
+      <div>
+        <label>Peso (kg)</label>
+        <input type="number" id="peso" step="0.1" />
+      </div>
+      <div>
+        <label>Altura (cm)</label>
+        <input type="number" id="altura" />
+      </div>
+      <div>
+        <label>Objetivo</label>
+        <select id="objetivo">
+          <option value="ganho">Ganho de Massa</option>
+          <option value="emagrecimento">Emagrecimento</option>
+          <option value="condicionamento">Condicionamento</option>
+        </select>
+      </div>
+      <div>
+        <label>Nível</label>
+        <select id="nivel">
+          <option value="iniciante">Iniciante</option>
+          <option value="intermediario">Intermediário</option>
+          <option value="avancado">Avançado</option>
+        </select>
+      </div>
+      <div>
+        <label>Frequência semanal</label>
+        <select id="frequencia">
+          <option value="3">3x por semana</option>
+          <option value="5">5x por semana</option>
+        </select>
+      </div>
+    </div>
+    <button onclick="gerarTreino()">Gerar Treino</button>
+  </div>
+
+  <div id="resultado"></div>
+
+  <script>
+    // Base de treinos (mantida simplificada)
+    const base = {
+      ganho: { masculino: { iniciante: [["Supino reto","Puxada no pulley","Agachamento","Cadeira extensora","Rosca direta"]]},
+               feminino: { iniciante: [["Agachamento","Cadeira abdutora","Mesa flexora","Stiff","Glúteo no cabo"]] } },
+      emagrecimento: { masculino: { iniciante: [["Corda","Burpees","Prancha","Agachamento","Corrida leve"]]},
+                       feminino: { iniciante: [["Corda","Burpees","Prancha","Agachamento","Corrida leve"]] } },
+      condicionamento: { masculino: { iniciante: [["Polichinelo","Mountain climber","Step","Corrida","Prancha"]]},
+                         feminino: { iniciante: [["Polichinelo","Mountain climber","Step","Corrida","Prancha"]] } }
+    };
+
+    // Função TMB (Mifflin-St Jeor)
+    function calcularTMB(peso, altura, idade, sexo) {
+      let tmb = sexo === "masculino"
+        ? (10 * peso) + (6.25 * altura) - (5 * idade) + 5
+        : (10 * peso) + (6.25 * altura) - (5 * idade) - 161;
+      return Math.round(tmb);
+    }
+
+    // Geração de treino
+    function gerarTreino() {
+      const nome = document.getElementById("nome").value.trim();
+      const idade = parseInt(document.getElementById("idade").value);
+      const data = new Date(document.getElementById("data").value);
+      const dataFormatada = isNaN(data) ? "—" : data.toLocaleDateString("pt-BR");
+      const sexo = document.getElementById("sexo").value;
+      const objetivo = document.getElementById("objetivo").value;
+      const nivel = document.getElementById("nivel").value;
+      const freq = parseInt(document.getElementById("frequencia").value);
+      const peso = parseFloat(document.getElementById("peso").value);
+      const altura = parseInt(document.getElementById("altura").value);
+
+      // Validação simples
+      if (!nome || !idade || !peso || !altura) {
+        alert("Preencha todos os campos antes de gerar o treino!");
+        return;
+      }
+
+      const tmb = calcularTMB(peso, altura, idade, sexo);
+
+      const treinoBase = (base[objetivo][sexo][nivel] || base[objetivo][sexo].iniciante);
+      const treino = [];
+      for (let i = 0; i < freq; i++) treino.push(treinoBase[i % treinoBase.length]);
+
+      const repeticoes = objetivo === "ganho" ? "3x10–12"
+                          : objetivo === "emagrecimento" ? "3x15–20"
+                          : "3x12–15";
+
+      let texto = `<h2>${nome}</h2>
+        <p><strong>Data de início:</strong> ${dataFormatada}</p>
+        <p><strong>Idade:</strong> ${idade} anos | <strong>Sexo:</strong> ${sexo} | <strong>Altura:</strong> ${altura} cm | <strong>Peso:</strong> ${peso} kg</p>
+        <p><strong>TMB estimada:</strong> ${tmb} kcal/dia</p>
+        <p><strong>Objetivo:</strong> ${objetivo} | <strong>Nível:</strong> ${nivel} | <strong>Frequência:</strong> ${freq}x/semana</p>`;
+
+      treino.forEach((dia, i) => {
+        texto += `<h3>Dia ${i + 1}</h3><ul>`;
+        dia.forEach(ex => texto += `<li>${ex} — ${repeticoes}</li>`);
+        texto += "</ul>";
+      });
+
+      let obs = "";
+      if (objetivo === "ganho") obs = "Aumentar cargas progressivamente a cada 2 semanas. Descanso: 60–90s.";
+      if (objetivo === "emagrecimento") obs = "Ritmo intenso, intervalos curtos (30–45s). Priorize hidratação e dieta leve.";
+      if (objetivo === "condicionamento") obs = "Trabalhar constância, coordenação e controle respiratório.";
+
+      texto += `<p><strong>Observações:</strong> ${obs}</p>`;
+      texto += `<button onclick="window.print()">Imprimir</button>`;
+
+      document.getElementById("resultado").innerHTML = texto;
+    }
+  </script>
+
+</body>
+</html>
